@@ -83,7 +83,39 @@ Warning: If your VM has a public IP, verify the VNet Link exist for the `Private
 
 In azure portal go to "Private DNS zones
 
+![](assets/20250919_194849_privatednszone-1.png)
+
+And look at the Private DNS Zone to check if there is a link for your VNet
+
+![](assets/20250919_195234_privatednszone-2.png)
+
+You can also look at the Recordsets to see all record defined for your Workspace services (like blob, api, onelake...) corresponding with Azure private IP.
+
+
+## Test private connectivity
 
 Now we have all the elements to establish a private (non public) connexion from the VM to your Microsoft Fabric Workspace.
 
 We are going to verify:
+
+* Start and connect to your VM,
+* Start a powershell Command Session
+* nslookup to verify the DNS return a private adress for your API ({workspaceID}.z{xy}.w.api.fabric.microsoft.com)
+
+![](assets/20250919_200149_nslookup.png)
+
+In this case the result is OK, 172.16.0.5 is a private IP.
+
+* Test-NetConnection powershell command to test a TCP access to the API.
+
+![](assets/20250919_200422_Test-NetConnection.png)
+
+Result OK private IP.
+
+
+## Deny Inbound Access to the Workspace
+
+Now it is time to deny the public access to the Workspace.
+
+
+![](assets/20250919_202105_Workspace-private-link-for-Fabric-scaled-2.png)
