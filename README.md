@@ -1,4 +1,4 @@
-# MSFabric-private-workspace
+# Helper to demonstrate MS Fabric Private Workspace
 
 
 ## Objectives
@@ -143,8 +143,6 @@ print(get_request.status_code, get_request.text)
 ```
 
 200 {"inbound":{"publicAccessRules":{"defaultAction":"Allow"}},"outbound":{"publicAccessRules":{"defaultAction":"Allow"}}}
-
-
 
 Now the Pyspark code to modify the Workspace Public Access Rules:
 
