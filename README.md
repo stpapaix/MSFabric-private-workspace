@@ -17,6 +17,11 @@ To can configure inbound private link access protection in workspace settings, y
 In "Tenant Settings", look at "Configure workspace-level inbound network rules" (in Advanced Networking section)
 ![alt text](assets/workspace-inbound-network-rules.png)
 
+This Objective of this post is to protect a MS Fabric Workspace from public access and authorize only access through private link like represented in the following schema:
+
+![](assets/20250919_220122_Workspace-private-link-for-Fabric-scaled-3.png)
+
+
 ## Create Private Link service for Fabric for Workspace
 
 You have to choose the private link you want to secure.
