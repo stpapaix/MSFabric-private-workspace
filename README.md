@@ -41,11 +41,9 @@ Now we can jump to the Objective which is to protect a MS Fabric Workspace from 
 
 ## Create Private Link service for Fabric for Workspace
 
-You have to choose the private link you want to secure.
+For the Workspace you want to secure you need to capture, **tenant ID**, and **workspace ID**.
 
-You need to capture, **your tenant ID**, and your **workspace ID**.
-
-### Tenant ID
+### To get Tenant ID
 
 Method in Fabric Portal:
 
@@ -54,16 +52,17 @@ Method in Fabric Portal:
 - Select “About Fabric”.
 - Look for the Tenant URL — your Tenant ID is the value of the`ctid` parameter in that URL.
 
-Simpler method with Azure Portal, go to Entra ID.
+Another simpler method is to use Azure Portal and go to Entra ID settings
 
-### Workspace ID
+### To get Workspace ID
 
 From your Fabric portal URL
 
 "https://app.fabric.microsoft.com/groups/`2983gbr-51e6-4687-b036-e5f4b42b3e3c`/list?experience=fabric-developer)
 
 Note : the Worspace ID is split into 5 groups separated by hyphens, following the standard UUID/GUID representation. Web app URLs use the standard GUID notation, so the portal shows it with hyphens for readability and consistency with API responses. (8-4-4-4-12). DNS hostnames can’t contain hyphens in certain positions that would break the label structure, so Microsoft strips them out when embedding the GUID into the FQDN for the data‑plane endpoint.
-Your Workspace ID will be : `2983gbr51e64687b036e5f4b42b3e3c`
+
+Your Workspace ID  : `2983gbr51e64687b036e5f4b42b3e3c`
 
 Now it's time to create your private Endpoint for your MS Fabric Workspace
 
@@ -73,7 +72,7 @@ Look at the MS documentation for that:
 
 You created a `microsoft.fabric/privatelinkservicesforfabric`
 
-To check go with Azure portal on the Ressource "Azure Resource Graph Explore", and execute the following query:
+To verify, go to Azure portal on the Ressource "Azure Resource Graph Explore", and execute the following query:
 
 ```
 resources 
@@ -83,7 +82,9 @@ resources
 
 ![](assets/20250919_184641_privatelinkservicesforfabric.png)
 
-Now it's time to create the infrastructure to implement your private endpoint to access to you Worksapce through the Fabric Private Link
+
+
+Now it's time to create the infrastructure to implement your private endpoint to access to your Workspace through the Fabric Private Link
 
 [Create a Virtual Network](https://learn.microsoft.com/en-us/fabric/security/security-workspace-level-private-links-set-up#step-3-create-a-virtual-network)
 
@@ -91,7 +92,7 @@ Now it's time to create the infrastructure to implement your private endpoint to
 
 [Create a Private Endpoint](https://learn.microsoft.com/en-us/fabric/security/security-workspace-level-private-links-set-up#step-5-create-a-private-endpoint)
 
-Now you will have something like this schema
+After doing these 3 steps you will have something like this schema
 
 ![](assets/20250919_193335_Workspace-private-link-for-Fabric-scaled-1.png)
 
@@ -136,9 +137,9 @@ Now it is time to deny the public access to the Workspace.
 
 ![](assets/20250919_202105_Workspace-private-link-for-Fabric-scaled-2.png)
 
-To modify or deny the Workqpace public access rules use the [Workspaces - Set Network Communication Policy API](https://learn.microsoft.com/en-us/rest/api/fabric/core/workspaces/set-network-communication-policy)
+To modify or deny the Workspace public access rules use the [Workspaces - Set Network Communication Policy API](https://learn.microsoft.com/en-us/rest/api/fabric/core/workspaces/set-network-communication-policy)
 
-There is differents ways to call the API, in this helper book we are going to use pyspark code to be able to execute the pyspark code from a Note Bok inside MS Fabric (Obviously from a Workspace with publi access).
+There is differents ways to call the API, in this helper book we are going to use pyspark code to be able to execute the pyspark code from a NoteBook inside MS Fabric (Obviously from a Workspace with public access).
 
 Pyspark code to verify the Workspace Public Access Rules:
 
@@ -161,6 +162,8 @@ print(get_request.status_code, get_request.text)
 ```
 
 200 {"inbound":{"publicAccessRules":{"defaultAction":"Allow"}},"outbound":{"publicAccessRules":{"defaultAction":"Allow"}}}
+
+
 
 Now the Pyspark code to modify the Workspace Public Access Rules:
 
