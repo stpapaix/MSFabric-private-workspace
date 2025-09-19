@@ -2,6 +2,7 @@
 
 
 
+
 ## Objectives
 
 Secure the Inbound access of a Microsoft Fabric Workspace with Azure Private Link and Azure Networking private endpoints.
@@ -16,6 +17,6 @@ Verify the following prerequisites
 
 To can configure inbound private link access protection in workspace settings, you have to authorize this action in Fabric Tenant Admin Portal.
 In "Tenant Settings", look at "Configure workspace-level inbound network rules" (in Advanced Networking section)
-![alt text](images/workspace-inbound-network-rules.png)
+![alt text](assets/workspace-inbound-network-rules.png)
 
 
