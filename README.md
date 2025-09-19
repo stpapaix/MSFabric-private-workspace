@@ -21,7 +21,6 @@ This Objective of this post is to protect a MS Fabric Workspace from public acce
 
 ![](assets/20250919_220122_Workspace-private-link-for-Fabric-scaled-3.png)
 
-
 ## Create Private Link service for Fabric for Workspace
 
 You have to choose the private link you want to secure.
@@ -64,9 +63,7 @@ resources
 | project id, name, type, location
 ```
 
-
 ![](assets/20250919_184641_privatelinkservicesforfabric.png)
-
 
 Now it's time to create the infrastructure to implement your private endpoint to access to you Worksapce through the Fabric Private Link
 
@@ -77,7 +74,6 @@ Now it's time to create the infrastructure to implement your private endpoint to
 [Create a Private Endpoint](https://learn.microsoft.com/en-us/fabric/security/security-workspace-level-private-links-set-up#step-5-create-a-private-endpoint)
 
 Now you will have something like this schema
-
 
 ![](assets/20250919_193335_Workspace-private-link-for-Fabric-scaled-1.png)
 
@@ -95,7 +91,6 @@ And look at the Private DNS Zone to check if there is a link for your VNet
 ![](assets/20250919_195234_privatednszone-2.png)
 
 You can also look at the Recordsets to see all record defined for your Workspace services (like blob, api, onelake...) corresponding with Azure private IP.
-
 
 ## Test private connectivity
 
@@ -117,10 +112,92 @@ In this case the result is OK, 172.16.0.5 is a private IP.
 
 Result OK private IP.
 
-
 ## Deny Inbound Access to the Workspace
 
 Now it is time to deny the public access to the Workspace.
 
-
 ![](assets/20250919_202105_Workspace-private-link-for-Fabric-scaled-2.png)
+
+To modify or deny the Workqpace public access rules use the [Workspaces - Set Network Communication Policy API](https://learn.microsoft.com/en-us/rest/api/fabric/core/workspaces/set-network-communication-policy)
+
+There is differents ways to call the API, in this helper book we are going to use pyspark code to be able to execute the pyspark code from a Note Bok inside MS Fabric (Obviously from a Workspace with publi access).
+
+Pyspark code to verify the Workspace Public Access Rules:
+
+```python
+# Verification de l'etat des authorisation Inbound et Outbound d'un Workspace
+from notebookutils import mssparkutils
+import requests
+
+WID = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+
+# Recuperation du token
+token = mssparkutils.credentials.getToken("https://api.fabric.microsoft.com")
+
+# Contruction du header
+h = {"Authorization": f"Bearer {token}", "Content-Type":"application/json"}
+
+# Test GET (reponse 200 attendue)
+get_request = requests.get(f"https://api.fabric.microsoft.com/v1/workspaces/{WID}/networking/communicationPolicy", headers=h)
+print(get_request.status_code, get_request.text)
+```
+
+200 {"inbound":{"publicAccessRules":{"defaultAction":"Allow"}},"outbound":{"publicAccessRules":{"defaultAction":"Allow"}}}
+
+
+
+Now the Pyspark code to modify the Workspace Public Access Rules:
+
+```python
+# Modification des authorisation Inbound et Outbound d'un Workspace
+from notebookutils import mssparkutils
+import requests, json, time
+
+WID = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx""
+
+# Valeur cible Inbound defaultvalue
+target_inbound_value = "Deny"
+
+# Recuperation du token Fabric API
+token = mssparkutils.credentials.getToken("https://api.fabric.microsoft.com")
+
+# Contruction du header
+h = {"Authorization": f"Bearer {token}", "Content-Type":"application/json"}
+
+# Recupèration de la policy actuelle
+current_policy = requests.get(
+    f"https://api.fabric.microsoft.com/v1/workspaces/{WID}/networking/communicationPolicy", 
+    headers=h
+    ).json()
+
+print("Policy actuelle: ", current_policy)
+
+# Contruction de la policy avec Inbound = Deny
+new_policy = current_policy
+new_policy.setdefault("inbound", {}).setdefault("publicAccessRules", {})["defaultAction"] = target_inbound_value
+
+# Application de la policy 
+put_request = requests.put(
+    f"https://api.fabric.microsoft.com/v1/workspaces/{WID}/networking/communicationPolicy", 
+    headers=h,
+    data=json.dumps(new_policy)
+)
+print("PUT Status", put_request.status_code, put_request.text)
+
+# Boucle pour attendre la maj
+for _ in range(4):
+    time.sleep(1)
+    test_result = requests.get(
+        f"https://api.fabric.microsoft.com/v1/workspaces/{WID}/networking/communicationPolicy",
+         headers=h
+    ).json()
+    print("defaultAction:", test_result)
+    if test_result.get("inbound", {}).get("publicAccessRules", {}).get("defaultAction") == target_inbound_value:
+        break
+
+```
+
+Policy actuelle:  {**'inbound': {'publicAccessRules': {'defaultAction': 'Allow'}**}, 'outbound': {'publicAccessRules': {'defaultAction': 'Allow'}}}
+
+PUT Status 200
+defaultAction: {**'inbound': {'publicAccessRules': {'defaultAction': 'Deny'}**}, 'outbound': {'publicAccessRules': {'defaultAction': 'Allow'}}}
